@@ -2,6 +2,8 @@
 // traditional locking approach (for comparison)
 // Jeff Trull <jetrull@sbcglobal.net> 2011-05-18
 
+#undef NDEBUG
+
 #include <iostream>
 #include <algorithm>
 #include <boost/lockfree/ringbuffer.hpp>
@@ -25,8 +27,13 @@ void producer() {
 
   while (produced_count < opcount) {
     int total_added = 0;
-    // note: leaving enqueued values uninitialized for now
-    while ((total_added += ring.enqueue(enqvalues, producer_chunksize - total_added)) < producer_chunksize) {}
+    while (total_added < producer_chunksize) {
+      // assemble input data
+      for (int j = 0; j < (producer_chunksize - total_added); ++j) {
+	enqvalues[j] = produced_count + total_added + j;
+      }
+      total_added += ring.enqueue(enqvalues, producer_chunksize - total_added);
+    }
     produced_count += producer_chunksize--;
     if (producer_chunksize < 1)
       producer_chunksize = chunksize_max;
@@ -40,7 +47,13 @@ void consumer() {
   while (consumed_count < opcount) {
     // spin until we succeed
     int total_removed = 0;
-    while ((total_removed += ring.dequeue(deqvalues, consumer_chunksize - total_removed)) < consumer_chunksize) {}
+    while (total_removed < consumer_chunksize) {
+      int removed_this_call = ring.dequeue(deqvalues, consumer_chunksize - total_removed);
+      for (int j = 0; j < removed_this_call; ++j) {
+	assert(deqvalues[j] == (consumed_count + total_removed + j));
+      }
+      total_removed += removed_this_call;
+    }
     consumed_count += consumer_chunksize--;
     if (consumer_chunksize < 1)
       consumer_chunksize = chunksize_max;
@@ -57,8 +70,8 @@ int main(int argc, char **argv) {
   consthread.join();
   prodthread.join();
 
-  // queue should now be empty
-  assert(queue.empty());
+  // ring should now be empty
+  assert(ring.empty());
 
   return 0;
 }

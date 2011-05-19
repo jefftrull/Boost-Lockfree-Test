@@ -2,6 +2,8 @@
 // traditional locking approach (for comparison)
 // Jeff Trull <jetrull@sbcglobal.net> 2011-05-18
 
+#undef NDEBUG
+
 #include <iostream>
 #include <algorithm>
 #include <boost/circular_buffer.hpp>
@@ -50,7 +52,9 @@ void consumer() {
     // lock
     boost::mutex::scoped_lock sl(shared_lock);
     for (int j = 0; j < consumer_chunksize; ++j) {
+      int front = ring.front();
       ring.pop_front();
+      assert(front == (i + j));
     }
     i += consumer_chunksize--;
     if (consumer_chunksize < 1)
@@ -69,8 +73,8 @@ int main(int argc, char **argv) {
   consthread.join();
   prodthread.join();
 
-  // queue should now be empty
-  assert(queue.empty());
+  // ring should now be empty
+  assert(ring.empty());
 
   return 0;
 }

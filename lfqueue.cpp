@@ -2,6 +2,9 @@
 // traditional locking approach (for comparison)
 // Jeff Trull <jetrull@sbcglobal.net> 2011-05-18
 
+// we want asserts, always
+#undef NDEBUG
+
 #include <iostream>
 #include <queue>
 
@@ -23,6 +26,7 @@ void consumer() {
     while (queue.empty()) {}
     int popval;
     queue.dequeue(&popval);
+    assert(popval == i);
   }
 }
 

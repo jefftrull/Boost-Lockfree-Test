@@ -1,6 +1,8 @@
 // Test program for Boost proposed Lockfree library: stack container
 // Jeff Trull <jetrull@sbcglobal.net> 2011-05-18
 
+#undef NDEBUG
+
 #include <iostream>
 #include <stack>
 
@@ -17,12 +19,20 @@ void producer() {
 }
 
 void consumer() {
+  int checksum = 0;    // not really a checksum but will allow us to verify without overflowing
   for (int i = 0; i < opcount; ++i) {
     // spin until stack has contents
     while (stack.empty()) {}
-    int popval;
-    stack.pop(&popval);
+    int top;
+    stack.pop(&top);
+    if (top % 2) {
+      checksum += top;
+    } else {
+      checksum -= top;
+    }
   }
+  // the sum of 0 + 1 - 2 ... + (opcount - 1) assuming opcount is even:
+  assert(checksum == (opcount / 2));
 }
 
 int main(int argc, char **argv) {

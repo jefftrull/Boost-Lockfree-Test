@@ -2,6 +2,8 @@
 // traditional locking approach (for comparison)
 // Jeff Trull <jetrull@sbcglobal.net> 2011-05-18
 
+#undef NDEBUG
+
 #include <iostream>
 #include <queue>
 
@@ -28,6 +30,8 @@ void consumer() {
     // lock
     boost::mutex::scoped_lock sl(shared_lock);
     if (!queue.empty()) {
+      int front = queue.front();
+      assert(front == consumed_count);
       queue.pop();
       consumed_count++;
     }
