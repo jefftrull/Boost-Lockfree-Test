@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(lockfree_test)
 
-find_package(Boost REQUIRED COMPONENTS thread)
+find_package(Boost REQUIRED COMPONENTS thread program_options)
 
 include_directories(${Boost_INCLUDE_DIR} ${BOOST_LOCKFREE_DIR})
 
