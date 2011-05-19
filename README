@@ -1,0 +1,1 @@
+This repository contains some code for testing the proposed Boost Lockfree library.  It instantiates "normal" and "lockfree" versions of each supplied container and exercises them similarly so they can be compared for performance.
