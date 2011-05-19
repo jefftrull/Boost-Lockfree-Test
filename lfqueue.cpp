@@ -32,7 +32,6 @@ void consumer(int opcount) {
     int popval;
     while (!queue.dequeue(&popval)) {}
     if ((num_cthreads == 1) && (num_pthreads == 1)) {
-      std::cerr << "num_cthreads: " << num_cthreads << " num_pthreads: " << num_pthreads << std::endl;
       assert(popval == i);
     }
   }
